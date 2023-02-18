@@ -21,6 +21,8 @@
 
 #include "SDL_sim_cursor.h"
 
+#include <stdio.h>
+
 struct SDL_Cursor
 {
     SDL_Cursor *next;
@@ -60,6 +62,7 @@ void SDL_SIM_MouseInit(void)
     SDL_SIM_Mouse *mouse = SDL_SIM_GetMouse();
 
     SDL_zerop(mouse);
+    // printf("SDL_SIM_MouseInit\n");
 
     mouse->cursor_shown = SDL_TRUE;
     mouse->def_cursor = SDL_SIM_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
@@ -98,6 +101,7 @@ void SDL_SIM_MouseQuit(void)
             BUILTIN_CURSORS[i]->cursor = NULL;
         }
     }
+    // printf("SDL_SIM_MouseQuit\n");
 }
 
 
@@ -113,6 +117,8 @@ void SDL_SIM_SetDefaultCursor(SDL_Cursor *cursor)
     SDL_SIM_Mouse *mouse = SDL_SIM_GetMouse();
 
     mouse->def_cursor = cursor;
+    // printf("SDL_SIM_SetDefaultCursor - %p", (void*)cursor);
+
     if (!mouse->cur_cursor) {
         SDL_SIM_SetCursor(cursor);
     }
@@ -181,6 +187,7 @@ SDL_Cursor *SDL_SIM_CreateColorCursor(SDL_Surface *surface, int hot_x, int hot_y
     if ((hot_x < 0) || (hot_y < 0) ||
         (hot_x >= surface->w) || (hot_y >= surface->h)) {
         SDL_SetError("Cursor hot spot doesn't lie within cursor");
+        // printf("SDL ERROR: Cursor hot spot doesn't lie within cursor\n");
         return NULL;
     }
 
@@ -212,9 +219,12 @@ SDL_Cursor *SDL_SIM_CreateSystemCursor(SDL_SystemCursor id)
 {
     BuiltinCursor *builtin_cursor;
 
+    // printf("SDL_SIM_CreateSystemCursor - %d", id);
+
     if (id >= (sizeof(BUILTIN_CURSORS) / sizeof(BUILTIN_CURSORS[0]))) {
         // TODO: maybe actually say which cursor was asked for.
         SDL_SetError("Unsupported SDL_SystemCursor.");
+        // printf("SDL ERROR: Unsupported SDL_SystemCursor %d\n", id);
 
         return NULL;
     }
@@ -223,8 +233,9 @@ SDL_Cursor *SDL_SIM_CreateSystemCursor(SDL_SystemCursor id)
     if (!builtin_cursor) {
         // TODO: maybe actually say which cursor was asked for.
         SDL_SetError("Unsupported SDL_SystemCursor.");
+        // printf("SDL ERROR: Unsupported SDL_SystemCursor %d\n", id);
 
-        return NULL;        
+        return NULL;
     }
 
     if (!builtin_cursor->cursor) {
@@ -253,6 +264,8 @@ void SDL_SIM_SetCursor(SDL_Cursor *cursor)
         return;
     }
 
+    // printf("SDL_SIM_SetCursor - %p\n", (void*)cursor);
+
     /* Set the new cursor */
     if (cursor) {
         /* Make sure the cursor is still valid for this mouse */
@@ -265,6 +278,7 @@ void SDL_SIM_SetCursor(SDL_Cursor *cursor)
             }
             if (found == NULL) {
                 SDL_SetError("Cursor not associated with the current mouse");
+                // printf("SDL ERROR: Cursor not associated with the current mouse\n");
                 return;
             }
         }
@@ -301,6 +315,7 @@ void SDL_SIM_FreeCursor(SDL_Cursor *cursor)
     SDL_SIM_Mouse *mouse = SDL_SIM_GetMouse();
     SDL_Cursor *curr, *prev;
 
+    // printf("SDL_SIM_FreeCursor - %p\n", (void*)cursor);
     if (cursor == NULL) {
         return;
     }
@@ -314,7 +329,8 @@ void SDL_SIM_FreeCursor(SDL_Cursor *cursor)
     }
 
     for (prev = NULL, curr = mouse->cursors; curr;
-         prev = curr, curr = curr->next) {
+        prev = curr, curr = curr->next) {
+
         if (curr == cursor) {
             if (prev) {
                 prev->next = curr->next;
@@ -322,8 +338,7 @@ void SDL_SIM_FreeCursor(SDL_Cursor *cursor)
                 mouse->cursors = curr->next;
             }
 
-            SDL_FreeSurface(curr->surface);
-            SDL_free(curr);
+            SDL_SIM__FreeCursor(curr);
             return;
         }
     }
@@ -338,6 +353,8 @@ int SDL_SIM_ShowCursor(int toggle)
         return 0;
     }
 
+    // printf("SDL_SIM_ShowCursor - %d\n", toggle);
+
     shown = mouse->cursor_shown;
     if (toggle >= 0) {
         if (toggle) {
@@ -345,9 +362,10 @@ int SDL_SIM_ShowCursor(int toggle)
         } else {
             mouse->cursor_shown = SDL_FALSE;
         }
-        if (mouse->cursor_shown != shown) {
-            SDL_SIM_SetCursor(NULL);
-        }
+
+        // if (mouse->cursor_shown != shown) {
+        //     SDL_SIM_SetCursor(NULL);
+        // }
     }
     return shown;
 }
@@ -360,23 +378,42 @@ void SDL_SIM_BlitCursor(SDL_Surface *surface)
     int x;
     int y;
 
-    if (!mouse)
-        return;
+    // printf("SDL_SIM_BlitCursor - ");
 
-    if (!mouse->cursor_shown)
+    if (mouse == NULL) {
+        // printf("no mouse\n");
         return;
+    }
 
-    if (!mouse->cur_cursor)
+    // printf("mouse - ");
+
+    if (!mouse->cursor_shown) {
+        // printf("cursor hidden\n");
         return;
+    }
 
-    cursor = mouse->cur_cursor;
+    // printf("cursor shown - ");
+    cursor = SDL_SIM_GetCursor();
+
+    if (cursor == NULL) {
+        cursor = SDL_SIM_GetDefaultCursor();
+
+        if (cursor == NULL) {
+            // printf("no cursor\n");
+            return;            
+        }
+    }
+
+    // printf("cursor found - ");
 
     SDL_GetMouseState(&x, &y);
-    
+
     mouse_dest.x = x - cursor->hot_x;
     mouse_dest.y = y - cursor->hot_y;
     mouse_dest.w = cursor->surface->w;
     mouse_dest.h = cursor->surface->h;
+
+    // printf("DRAW -> %d, %d, %d, %d\n", mouse_dest.x, mouse_dest.y, mouse_dest.w, mouse_dest.h);
 
     SDL_BlitSurface(cursor->surface, NULL, surface, &mouse_dest);
 }

@@ -1,4 +1,9 @@
 #!/usr/bin/env python3.9
+"""
+
+This reads the associated png/in files in pngs/ and converts them into a format that sdl can load.
+
+"""
 
 from pathlib import Path
 from PIL import Image
@@ -32,10 +37,11 @@ def load_png_to_bitarray(png_file):
         for x in range(im.height):
             if pix[x, y] == (255, 255, 255, 255):
                 # White
+                datab |= (1<<i);
                 maskb |= (1<<i);
             elif pix[x, y] == (0, 0, 0, 255):
                 # Black
-                datab |= (1<<i);
+                # datab |= (1<<i);
                 maskb |= (1<<i);
             else:
                 # Transparent

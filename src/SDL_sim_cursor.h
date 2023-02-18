@@ -22,6 +22,10 @@
 #ifndef SDL_SIM_CURSOR
 #define SDL_SIM_CURSOR
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <SDL.h>
 
 extern void SDL_SIM_MouseInit();
@@ -47,6 +51,11 @@ extern void SDL_SIM_BlitCursor(SDL_Surface *surface);
 #define SDL_CreateCursor SDL_SIM_CreateCursor
 #define SDL_CreateSystemCursor SDL_SIM_CreateSystemCursor
 #define SDL_ShowCursor SDL_SIM_ShowCursor
+#endif
+
+/* Ends C function definitions when using C++ */
+#ifdef __cplusplus
+}
 #endif
 
 #endif
