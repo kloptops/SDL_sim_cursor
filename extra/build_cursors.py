@@ -37,11 +37,10 @@ def load_png_to_bitarray(png_file):
         for x in range(im.height):
             if pix[x, y] == (255, 255, 255, 255):
                 # White
-                datab |= (1<<i);
                 maskb |= (1<<i);
             elif pix[x, y] == (0, 0, 0, 255):
                 # Black
-                # datab |= (1<<i);
+                datab |= (1<<i);
                 maskb |= (1<<i);
             else:
                 # Transparent
@@ -80,7 +79,7 @@ def make_cursor_object(object_name, png_file, in_file):
     print(f'const unsigned char BUILTIN_{object_name}_DATA[] = {{')
     print( '    ' + ',\n    '.join(data_output) + '};')
     print(f'const unsigned char BUILTIN_{object_name}_MASK[] = {{')
-    print( '    ' + ',\n    '.join(data_output) + '};')
+    print( '    ' + ',\n    '.join(mask_output) + '};')
     print()
     print(f'BuiltinCursor BUILTIN_{object_name} = {{')
     print(f'    {width}, {width}, {hot_x}, {hot_y}, NULL,')
