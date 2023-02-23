@@ -372,6 +372,12 @@ int SDL_SIM_ShowCursor(int toggle)
 
 void SDL_SIM_BlitCursor(SDL_Surface *surface)
 {
+    SDL_SIM_BlitCursorScaled(surface, 1.0);
+}
+
+static int debug_counter = 0;
+void SDL_SIM_BlitCursorScaled(SDL_Surface *surface, float scale)
+{
     SDL_SIM_Mouse *mouse = SDL_SIM_GetMouse();
     SDL_Cursor *cursor;
     SDL_Rect mouse_dest;
@@ -408,11 +414,10 @@ void SDL_SIM_BlitCursor(SDL_Surface *surface)
 
     SDL_GetMouseState(&x, &y);
 
-    mouse_dest.x = x - cursor->hot_x;
-    mouse_dest.y = y - cursor->hot_y;
+    mouse_dest.x = (int)((float)(x - cursor->hot_x) / scale);
+    mouse_dest.y = (int)((float)(y - cursor->hot_y) / scale);
     mouse_dest.w = cursor->surface->w;
     mouse_dest.h = cursor->surface->h;
-
     // printf("DRAW -> %d, %d, %d, %d\n", mouse_dest.x, mouse_dest.y, mouse_dest.w, mouse_dest.h);
 
     SDL_BlitSurface(cursor->surface, NULL, surface, &mouse_dest);

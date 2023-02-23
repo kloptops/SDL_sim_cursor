@@ -44,9 +44,11 @@ extern int SDL_SIM_ShowCursor(int toggle);
 
 /* */
 extern void SDL_SIM_BlitCursor(SDL_Surface *surface);
+extern void SDL_SIM_BlitCursorScaled(SDL_Surface *surface, float scaled);
 
 #ifdef SDL_SIM_ENABLE
 #define SDL_BlitCursor SDL_SIM_BlitCursor
+#define SDL_BlitCursorScaled SDL_SIM_BlitCursorScaled
 #define SDL_SetCursor SDL_SIM_SetCursor
 #define SDL_CreateCursor SDL_SIM_CreateCursor
 #define SDL_CreateSystemCursor SDL_SIM_CreateSystemCursor
