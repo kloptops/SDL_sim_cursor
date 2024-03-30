@@ -14,7 +14,7 @@ Place `SDL_sim_cursor.h` into your source tree.
 
 ```C
 
-/* at the following include into a header that includes SDL.h */
+/* Add the following include into a header that includes SDL.h */
 #include "SDL_sim_cursor.h"
 
 /* And in atleast 1 c/cpp file that includes the header you placed the above line in, add at the top of the file */
